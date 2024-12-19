@@ -1,152 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>QuadQueryApp</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
-<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://unpkg.com/mithril/mithril.js"></script>
+  <meta charset="UTF-8">
+  <title>QuadQueryApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://unpkg.com/mithril/mithril.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f8f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
 
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-  }
-  
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #eee;
-  }
-  
-  header img {
-    height: 50px;
-  }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
 
-  h1 {
-    font-size: 2rem;
-    color: #333;
-  }
+    header img {
+      height: 50px;
+    }
 
-  .button {
-    background-color: #3273dc;
-    color: white;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-size: 1rem;
-  }
-  
-  .button:hover {
-    background-color: #276cda;
-  }
+    h1 {
+      font-size: 2rem;
+      color: #333;
+    }
 
-  .section {
-    margin: 20px 0;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
+    .button {
+      background-color: #3273dc;
+      color: white;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
 
-  input[type="text"] {
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    width: 100%;
-    box-sizing: border-box;
-  }
+    .button:hover {
+      background-color: #276cda;
+    }
 
-  input[type="text"]:focus {
-    border-color: #3273dc;
-    outline: none;
-  }
-  
-  .results p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-  }
-</style>
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      border-color: #3273dc;
+      outline: none;
+    }
+
+    .results p {
+      margin: 5px 0;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
+  <script>
+    let results = [];
+    let totalMatches = 0;
+    let currentPage = 1;
 
-<script>	
-let results = [];
-let totalMatches = 0;
-let currentPage = 1;
+    const QuadQueryApp = {
+      oninit: function() {
+        fetchData(); // Load initial data
+      },
+      view: function() {
+        return m("div", [
+          m("header", [
+            m("h1", "Graph Query App"),
+            m("img", {
+              src: "https://example.com/logo.png",
+              alt: "App Logo"
+            })
+          ]),
+          m(".section", [
+            m("h2", "Query by Quad Pattern"),
+            m("div", [
+              m("input[type=text]", { placeholder: "Subject", oninput: (e) => queryParams.subject = e.target.value }),
+              m("input[type=text]", { placeholder: "Predicate", oninput: (e) => queryParams.predicate = e.target.value }),
+              m("input[type=text]", { placeholder: "Object", oninput: (e) => queryParams.object = e.target.value }),
+              m("input[type=text]", { placeholder: "Graph Name", oninput: (e) => queryParams.graph = e.target.value }),
+              m("button.button", { onclick: fetchData }, "Run Query")
+            ])
+          ]),
+          m(".section", [
+            m("p", `Showing results for page ${currentPage}.`),
+            m("button.button", { onclick: nextPage }, "Next Page")
+          ]),
+          m(".section.results", [
+            results.length === 0 ? m("p", "No results found") : results.map((result, index) =>
+              m("p", { key: index }, `${result.subject} ${result.predicate} ${result.object} ${result.graph}`)
+            )
+          ])
+        ]);
+      }
+    };
 
-const QuadQueryApp = {
-  view: function () {
-    return m("div", [
-      // Header
-      m("header", [
-        m("h1", "Dhaker Iyad Nejah & Yanis Ouerdani"), // Combined names better
-        m("img", {
-          src: "https://th.bing.com/th/id/R.7264834a50146dda666eb3e0cdd37373?rik=P9%2bOt1GQfJ6M%2bQ&riu=http%3a%2f%2fswelinscription.univ-nantes.fr%2fimg%2funantes-logo.png&ehk=pl%2fbpIHPl%2fnqA2jssKuUkUrl8KgLaqsUYub4PhI%2bobY%3d&risl=&pid=ImgRaw&r=0",
-          alt: "University Logo"
-        })
-      ]),
+    const queryParams = {
+      subject: "",
+      predicate: "",
+      object: "",
+      graph: ""
+    };
 
-      // Query Form Section
-      m(".section", [
-        m("h2", "Query by Quad Pattern"),
-        m("div", { style: { marginBottom: "20px" } }, [
-          m("input[type=text]", { placeholder: "Subject" }),
-          m("input[type=text]", { placeholder: "Predicate" }),
-          m("input[type=text]", { placeholder: "Object" }),
-          m("input[type=text]", { placeholder: "Graph" }),
-          m("button.button", {
-            onclick: handleSearch
-          }, "Find Matching Quads")
-        ])
-      ]),
+    function constructGQLQuery() {
+      let filters = [];
+      if (queryParams.subject) filters.push(`subject = "${queryParams.subject}"`);
+      if (queryParams.predicate) filters.push(`predicate = "${queryParams.predicate}"`);
+      if (queryParams.object) filters.push(`object = "${queryParams.object}"`);
+      if (queryParams.graph) filters.push(`graph = "${queryParams.graph}"`);
+      if (filters.length === 0) filters.push("true"); // Default query condition
 
-      // Matches Information
-      m(".section", [
-        m("p", [
-          "Matches in database for:",
-          m("br"),
-          `Showing Quads ${currentPage * 100 - 99} to ${Math.min(currentPage * 100, totalMatches)} of ± ${totalMatches} with 100 triples per page.`
-        ]),
+      return `
+        MATCH (n:RDFTriple)
+        WHERE ${filters.join(' AND ')}
+        RETURN n
+        SKIP ${(currentPage - 1) * 100}
+        LIMIT 100
+      `;
+    }
 
-        m("button.button", { onclick: nextPage }, "Next"),
-      ]),
+    function fetchData() {
+      const gqlQuery = constructGQLQuery();
 
-      // Results Section
-      m(".section.results", [
-        results.length === 0 ? m("p", "No results found") : results.map((result, index) =>
-          m("p", { key: index }, `${result.subject} ${result.predicate} ${result.object} ${result.graph}`)
-        )
-      ])
-    ]);
-  }
-};
+      fetch('/graphql-endpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: gqlQuery })
+      })
+      .then(response => response.json())
+      .then(data => {
+        results = data.results || [];
+        totalMatches = data.totalMatches || 0;
+        m.redraw();
+      })
+      .catch(error => console.error("Error fetching data:", error));
+    }
 
-// Functions
-function handleSearch() {
-  // Placeholder for the query logic
-  // Example API call to fetch results and set states
-  // results = fetchedResults;
-  // totalMatches = totalEntries;
-}
+    function nextPage() {
+      currentPage++;
+      fetchData();
+    }
 
-function nextPage() {
-  currentPage += 1;
-}
-
-// Initialize Mythril app
-m.mount(document.body, QuadQueryApp);
-
-</script>
-
+    // Initialize Mithril app
+    m.mount(document.body, QuadQueryApp);
+  </script>
 </body>
 </html>
