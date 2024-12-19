@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuadQueryApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://unpkg.com/mithril/mithril.js"></script>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+  }
+  
+  header img {
+    height: 50px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+  }
+
+  .button {
+    background-color: #3273dc;
+    color: white;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+  
+  .button:hover {
+    background-color: #276cda;
+  }
+
+  .section {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="text"] {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  input[type="text"]:focus {
+    border-color: #3273dc;
+    outline: none;
+  }
+  
+  .results p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<script>	
+let results = [];
+let totalMatches = 0;
+let currentPage = 1;
+
+const QuadQueryApp = {
+  view: function () {
+    return m("div", [
+      // Header
+      m("header", [
+        m("h1", "Dhaker Iyad Nejah & Yanis Ouerdani"), // Combined names better
+        m("img", {
+          src: "https://th.bing.com/th/id/R.7264834a50146dda666eb3e0cdd37373?rik=P9%2bOt1GQfJ6M%2bQ&riu=http%3a%2f%2fswelinscription.univ-nantes.fr%2fimg%2funantes-logo.png&ehk=pl%2fbpIHPl%2fnqA2jssKuUkUrl8KgLaqsUYub4PhI%2bobY%3d&risl=&pid=ImgRaw&r=0",
+          alt: "University Logo"
+        })
+      ]),
+
+      // Query Form Section
+      m(".section", [
+        m("h2", "Query by Quad Pattern"),
+        m("div", { style: { marginBottom: "20px" } }, [
+          m("input[type=text]", { placeholder: "Subject" }),
+          m("input[type=text]", { placeholder: "Predicate" }),
+          m("input[type=text]", { placeholder: "Object" }),
+          m("input[type=text]", { placeholder: "Graph" }),
+          m("button.button", {
+            onclick: handleSearch
+          }, "Find Matching Quads")
+        ])
+      ]),
+
+      // Matches Information
+      m(".section", [
+        m("p", [
+          "Matches in database for:",
+          m("br"),
+          `Showing Quads ${currentPage * 100 - 99} to ${Math.min(currentPage * 100, totalMatches)} of ± ${totalMatches} with 100 triples per page.`
+        ]),
+
+        m("button.button", { onclick: nextPage }, "Next"),
+      ]),
+
+      // Results Section
+      m(".section.results", [
+        results.length === 0 ? m("p", "No results found") : results.map((result, index) =>
+          m("p", { key: index }, `${result.subject} ${result.predicate} ${result.object} ${result.graph}`)
+        )
+      ])
+    ]);
+  }
+};
+
+// Functions
+function handleSearch() {
+  // Placeholder for the query logic
+  // Example API call to fetch results and set states
+  // results = fetchedResults;
+  // totalMatches = totalEntries;
+}
+
+function nextPage() {
+  currentPage += 1;
+}
+
+// Initialize Mythril app
+m.mount(document.body, QuadQueryApp);
+
+</script>
+
+</body>
+</html>
