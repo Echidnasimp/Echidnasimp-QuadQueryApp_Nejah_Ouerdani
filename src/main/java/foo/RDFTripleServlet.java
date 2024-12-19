@@ -1,8 +1,8 @@
 package foo;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,11 +27,15 @@ public class RDFTripleServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         // Load Turtle file
-        String turtleFilePath = "/home/dhaker_iyed27najeh/QuadQueryApp_Nejah_Ouerdani/src/foo/2024_medalists_nuts_only.ttl"; // Update with your file path
+        String turtleFilePath = "/2024_medalists_nuts_only.ttl";
         Model model = ModelFactory.createDefaultModel();
-        try (FileInputStream fis = new FileInputStream(turtleFilePath)) {
+        try (InputStream fis = getClass().getResourceAsStream(turtleFilePath)) {
+            if (fis == null) {
+                throw new FileNotFoundException("Resource not found: " + turtleFilePath);
+            }
             model.read(fis, null, "TTL");
         }
+
 
         // Initialize Datastore
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
