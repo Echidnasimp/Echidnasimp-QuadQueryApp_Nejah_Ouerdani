@@ -1,1 +1,17 @@
 indexes:
+# Example for querying by multiple properties (if required)
+- kind: RDFTriple
+  properties:
+  - name: subject
+  - name: predicate
+
+
+- kind: RDFTriple
+  properties:
+  - name: object
+  - name: predicate
+
+- kind: RDFTriple
+  properties:
+  - name: subject
+  - name: object
