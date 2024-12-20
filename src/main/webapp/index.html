@@ -91,8 +91,8 @@
           m("header", [
             m("h1", "Graph Query App"),
             m("img", {
-              src: "https://example.com/logo.png",
-              alt: "App Logo"
+              src: "https://madoc.univ-nantes.fr/pluginfile.php/2/core_admin/logo/0x200/1727681200/Logotype_NantesUniversit%C3%A9_Vecto%20-%20web.png",
+              alt: "uni Logo"
             })
           ]),
           m(".section", [
@@ -131,37 +131,49 @@
       if (queryParams.predicate) filters.push(`predicate = "${queryParams.predicate}"`);
       if (queryParams.object) filters.push(`object = "${queryParams.object}"`);
       if (queryParams.graph) filters.push(`graph = "${queryParams.graph}"`);
-      if (filters.length === 0) filters.push("true"); // Default query condition
 
-      return `
-        MATCH (n:RDFTriple)
-        WHERE ${filters.join(' AND ')}
-        RETURN n
-        SKIP ${(currentPage - 1) * 100}
+      let whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : "";
+      
+      // Construct the query
+      let query = `
+        SELECT *
+        FROM RDFTriple
+        ${whereClause}
         LIMIT 100
+        OFFSET ${(currentPage - 1) * 100}
       `;
+
+  return query;
     }
 
-    function fetchData() {
+      function fetchData() {
       const gqlQuery = constructGQLQuery();
 
-      fetch('/graphql-endpoint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: gqlQuery })
+      fetch('https://quads-nejah-ouerdani.ew.r.appspot.com/graphql-endpoint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: gqlQuery })
       })
-      .then(response => response.json())
+      .then(response => {
+      if (!response.ok) {
+          console.error("HTTP error: ", response.status, response.statusText);  // Log status and statusText for more details
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+      })
       .then(data => {
-        results = data.results || [];
-        totalMatches = data.totalMatches || 0;
-        m.redraw();
+          results = data.results || [];
+          totalMatches = data.totalMatches || 0; 
+          m.redraw();
       })
       .catch(error => console.error("Error fetching data:", error));
-    }
+      }
 
-    function nextPage() {
-      currentPage++;
-      fetchData();
+      
+
+      function nextPage() {
+        currentPage++;
+        fetchData();
     }
 
     // Initialize Mithril app
