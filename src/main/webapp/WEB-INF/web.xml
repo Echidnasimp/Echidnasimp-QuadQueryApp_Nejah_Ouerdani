@@ -17,4 +17,27 @@
         <url-pattern>/processTurtle</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>graphql</servlet-name>
+        <servlet-class>com.google.api.server.spi.graphql</servlet-class>
+		<init-param>
+			<param-name>services</param-name>
+			<param-value>foo.GraphQLController</param-value>
+		</init-param>
+    </servlet>
+    <!-- Route API method requests to the backend. -->
+    <servlet-mapping>
+        <servlet-name>graphql</servlet-name>
+        <url-pattern>/graphql-endpointe</url-pattern>
+    </servlet-mapping>
+
+
+
+    <welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+
+
+    
 </web-app>
